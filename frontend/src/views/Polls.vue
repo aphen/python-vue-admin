@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ElMessage } from 'element-plus';
 import { Loading } from '@element-plus/icons-vue';
-import { getPolls, submitVote, type Poll} from '../api/polls';
+import { getPolls, submitVote, type Poll, type PollVO } from '../api/polls';
 
-const polls = ref<Poll[]>([]);
+const polls = ref<PollVO[]>([]);
 const loading = ref(false);
 const voteLoading = ref<number[]>([]);
 
@@ -11,7 +11,7 @@ const fetchPolls = async () => {
   loading.value = true;
   try {
     const response = await getPolls();
-    polls.value = response.data;
+    polls.value = response.data.results || [];
     console.log('Fetched polls:', polls.value);
   } catch (error) {
     console.error('Error fetching polls:', error);

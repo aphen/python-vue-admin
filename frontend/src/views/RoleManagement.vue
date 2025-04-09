@@ -92,7 +92,7 @@ const roleForm = ref({
 const fetchRoles = async () => {
   try {
     const response = await getRoles()
-    roles.value = response.data
+    roles.value = response.data.results
   } catch (error) {
     ElMessage.error('获取角色列表失败')
   }
@@ -102,7 +102,7 @@ const fetchRoles = async () => {
 const fetchUsers = async () => {
   try {
     const response = await getUsers()
-    allUsers.value = response.map((user: any) => ({
+    allUsers.value = response.results.map((user: any) => ({
       id: user.id,
       username: user.username
     }))

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { User, House, List, Setting } from '@element-plus/icons-vue'
+import { User, House, List, Setting, Calendar, Document } from '@element-plus/icons-vue'
 
 const isCollapse = ref(false)
 const router = useRouter()
@@ -12,7 +12,6 @@ const handleSelect = (key: string) => {
 </script>
 
 <template>
-
     <div class="container">
       <el-menu
         class="sidebar"
@@ -29,6 +28,18 @@ const handleSelect = (key: string) => {
           <el-icon><List /></el-icon>
           <template #title>投票</template>
         </el-menu-item>
+        <el-menu-item index="/todo">
+          <el-icon><Calendar /></el-icon>
+          <template #title>待办事项</template>
+        </el-menu-item>
+        <el-sub-menu index="blog">
+          <template #title>
+            <el-icon><Document /></el-icon>
+            <span>博客管理</span>
+          </template>
+          <el-menu-item index="/blog/list">博客列表</el-menu-item>
+          <el-menu-item index="/blog/create">发布文章</el-menu-item>
+        </el-sub-menu>
         <el-sub-menu index="system">
           <template #title>
             <el-icon><Setting /></el-icon>
@@ -64,7 +75,6 @@ const handleSelect = (key: string) => {
         <router-view />
       </div>
     </div>
-
 </template>
 
 <style scoped>

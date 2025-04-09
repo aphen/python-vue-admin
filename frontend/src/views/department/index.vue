@@ -82,8 +82,9 @@ const rules: FormRules = {
 const fetchDepartmentList = async () => {
   try {
     const response = await getDepartmentList()
-    departmentList.value = response.data
-    departmentOptions.value = response.data
+    console.log(response) // 打印响应数据，以确认数据结构和内容是否正确
+    departmentList.value = response.data.results
+    departmentOptions.value = response.data.results
   } catch (error) {
     console.error('获取部门列表失败:', error)
     ElMessage.error('获取部门列表失败')

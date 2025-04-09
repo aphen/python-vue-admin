@@ -7,6 +7,10 @@ import router from './router'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 
+// 引入Element Tiptap
+import { ElementTiptap } from 'element-tiptap'
+import 'element-tiptap/lib/style.css'
+
 // 引入Pinia
 import { createPinia } from 'pinia'
 const pinia = createPinia()
@@ -15,4 +19,5 @@ const app = createApp(App)
 app.use(router)
 app.use(ElementPlus)
 app.use(pinia)
+app.component('element-tiptap', ElementTiptap)
 app.mount('#app')

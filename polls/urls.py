@@ -8,6 +8,8 @@ from . import role_views
 from .department_views import DepartmentViewSet
 from .system_monitor import SystemMonitorView
 from .operation_log_views import OperationLogViewSet
+from .todo_views import TodoViewSet
+from .blog_views import BlogPostViewSet
 
 router = DefaultRouter()
 router.register(r'polls', api_views.QuestionViewSet)
@@ -15,6 +17,8 @@ router.register(r'users', UserViewSet, basename='users')
 router.register(r'roles', role_views.RoleViewSet)
 router.register(r'departments', DepartmentViewSet, basename='departments')
 router.register(r'operation-logs', OperationLogViewSet, basename='operation-logs')
+router.register(r'todos', TodoViewSet, basename='todo')
+router.register(r'blog-posts', BlogPostViewSet, basename='blog-posts')
 
 app_name = 'polls'
 urlpatterns = [

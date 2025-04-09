@@ -1,10 +1,14 @@
 import api from './index'
 
-export interface Poll {
+export interface PollVO {
   id: number
   question_text: string
   pub_date: string
   choices: Choice[]
+}
+export interface Poll {
+  results?: PollVO[];
+  count?: number
 }
 
 export interface Choice {
@@ -15,7 +19,7 @@ export interface Choice {
 
 // 获取投票列表
 export const getPolls = () => {
-  return api.get<Poll[]>('/polls/api/polls/')
+  return api.get<Poll>('/polls/api/polls/')
 }
 
 // 获取投票详情

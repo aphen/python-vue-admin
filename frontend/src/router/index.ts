@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Layout from '../components/Layout.vue'
+import blogRoutes from './modules/blog'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -18,6 +19,7 @@ const router = createRouter({
       name: 'register',
       component: () => import('../views/RegisterView.vue')
     },
+    blogRoutes,
     {
       path: '/',
       component: Layout,
@@ -61,6 +63,11 @@ const router = createRouter({
           path: 'system/operation-log',
           name: 'operationLog',
           component: () => import('../views/OperationLogManagement.vue')
+        },
+        {
+          path: 'todo',
+          name: 'todoList',
+          component: () => import('../views/TodoList.vue')
         }
       ]
     }

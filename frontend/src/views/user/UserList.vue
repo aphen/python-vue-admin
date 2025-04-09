@@ -43,7 +43,8 @@ const loading = ref(false)
 const fetchUsers = async () => {
   loading.value = true
   try {
-    users.value = await getUsers()
+    const res = await getUsers()
+    users.value = res.results
     console.log(users.value)
    } catch (error) {
     ElMessage.error('获取用户列表失败')
@@ -128,7 +129,7 @@ const handleDelete = async (row: User) => {
 const fetchDepartments = async () => {
   try {
     const response = await getDepartmentList()
-    departments.value = response.data
+    departments.value = response.data.results
   } catch (error) {
     ElMessage.error('获取部门列表失败')
   }

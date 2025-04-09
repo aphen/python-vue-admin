@@ -36,7 +36,7 @@ const rules: FormRules = {
 const fetchDepartments = async () => {
   try {
     const response = await getDepartmentList()
-    departments.value = response.data
+    departments.value = response.data.results
   } catch (error) {
     ElMessage.error('获取部门列表失败')
   }

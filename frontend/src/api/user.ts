@@ -15,7 +15,7 @@ export interface CreateUserData {
 }
 
 export const getUsers = async () => {
-  const response = await api.get<User[]>('/polls/api/users/')
+  const response = await api.get<{results: User[]}>('/polls/api/users/')
   return response.data
 }
 

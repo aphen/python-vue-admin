@@ -6,7 +6,13 @@ export interface Department {
   parent: number | null
   parent_name?: string
   order: number
-  children?: Department[]
+  children?: Department[],
+}
+export interface DepartmentList {
+  count: number
+  next: string | null
+  previous: string | null
+  results: Department[]
 }
 
 export interface DepartmentForm {
@@ -18,7 +24,7 @@ export interface DepartmentForm {
 
 // 获取部门列表
 export const getDepartmentList = () => {
-  return request.get<Department[]>('/polls/api/departments/')
+  return request.get<DepartmentList>('/polls/api/departments/')
 }
 
 // 创建部门
