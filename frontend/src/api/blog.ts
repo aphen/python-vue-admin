@@ -2,7 +2,7 @@ import request from '@/api/index'
 
 export interface BlogPost {
   id: number
-  title: string
+  title?: string
   content: string
   summary: string
   author: {
@@ -28,7 +28,7 @@ export interface BlogPostsParams {
 // 获取博客文章列表
 export const getBlogPosts = (params: BlogPostsParams) => {
   return request<BlogPostsResponse>({
-    url: '/api/blog-posts/',
+    url: '/polls/api/blog-posts/',
     method: 'get',
     params
   })
@@ -37,7 +37,7 @@ export const getBlogPosts = (params: BlogPostsParams) => {
 // 获取博客文章详情
 export const getBlogPost = (id: string | number) => {
   return request<BlogPost>({
-    url: `/api/blog-posts/${id}/`,
+    url: `/polls/api/blog-posts/${id}/`,
     method: 'get'
   })
 }
@@ -45,7 +45,7 @@ export const getBlogPost = (id: string | number) => {
 // 创建博客文章
 export const createBlogPost = (data: Partial<BlogPost>) => {
   return request<BlogPost>({
-    url: '/api/blog-posts/',
+    url: '/polls/api/blog-posts/',
     method: 'post',
     data
   })
@@ -54,7 +54,7 @@ export const createBlogPost = (data: Partial<BlogPost>) => {
 // 更新博客文章
 export const updateBlogPost = (id: number, data: Partial<BlogPost>) => {
   return request<BlogPost>({
-    url: `/api/blog-posts/${id}/`,
+    url: `/polls/api/blog-posts/${id}/`,
     method: 'put',
     data
   })
@@ -63,7 +63,7 @@ export const updateBlogPost = (id: number, data: Partial<BlogPost>) => {
 // 删除博客文章
 export const deleteBlogPost = (id: number) => {
   return request({
-    url: `/api/blog-posts/${id}/`,
+    url: `/polls/api/blog-posts/${id}/`,
     method: 'delete'
   })
 }

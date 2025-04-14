@@ -1,14 +1,32 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { User, House, List, Setting, Calendar, Document } from '@element-plus/icons-vue'
+import { useUserStore } from '@/store/user'
+import { hasPermission } from '@/utils/permission'
 
 const isCollapse = ref(false)
 const router = useRouter()
+const userStore = useUserStore()
 
 const handleSelect = (key: string) => {
   router.push(key)
 }
+
+// 检查菜单项是否有权限显示
+const checkMenuPermission = (path: string) => {
+  return hasPermission({ path } as any)
+}
+
+// 计算有权限显示的菜单项
+const showUserManagement = computed(() => checkMenuPermission('/user/list'))
+const showRoleManagement = computed(() => checkMenuPermission('/role/list'))
+const showDepartmentManagement = computed(() => checkMenuPermission('/department/list'))
+const showSystemMonitor = computed(() => checkMenuPermission('/system/monitor'))
+const showOperationLog = computed(() => checkMenuPermission('/system/operation-log'))
+const showBlogManagement = computed(() => checkMenuPermission('/blog/list') || checkMenuPermission('/blog/create'))
+const showTodo = computed(() => checkMenuPermission('/todo'))
+const showPolls = computed(() => checkMenuPermission('/polls'))
 </script>
 
 <template>
@@ -22,50 +40,50 @@ const handleSelect = (key: string) => {
       >
         <el-menu-item index="/home">
           <el-icon><House /></el-icon>
-          <template #title>首页</template>
+          <template #title>首页{{showPolls}}</template>
         </el-menu-item>
-        <el-menu-item index="/polls">
+        <el-menu-item v-if="showPolls" index="/polls">
           <el-icon><List /></el-icon>
           <template #title>投票</template>
         </el-menu-item>
-        <el-menu-item index="/todo">
+        <el-menu-item v-if="showTodo" index="/todo">
           <el-icon><Calendar /></el-icon>
           <template #title>待办事项</template>
         </el-menu-item>
-        <el-sub-menu index="blog">
+        <el-sub-menu v-if="showBlogManagement" index="blog">
           <template #title>
             <el-icon><Document /></el-icon>
             <span>博客管理</span>
           </template>
-          <el-menu-item index="/blog/list">博客列表</el-menu-item>
-          <el-menu-item index="/blog/create">发布文章</el-menu-item>
+          <el-menu-item v-if="checkMenuPermission('/blog/list')" index="/blog/list">博客列表</el-menu-item>
+          <el-menu-item v-if="checkMenuPermission('/blog/create')" index="/blog/create">发布文章</el-menu-item>
         </el-sub-menu>
-        <el-sub-menu index="system">
+        <el-sub-menu v-if="showUserManagement || showRoleManagement || showDepartmentManagement || showSystemMonitor || showOperationLog" index="system">
           <template #title>
             <el-icon><Setting /></el-icon>
             <span>系统管理</span>
           </template>
-          <el-sub-menu index="user">
+          <el-sub-menu v-if="showUserManagement" index="user">
             <template #title>
               <el-icon><User /></el-icon>
               <span>用户管理</span>
             </template>
-            <el-menu-item index="/user/list">用户列表</el-menu-item>
-            <el-menu-item index="/user/profile">个人信息</el-menu-item>
+            <el-menu-item v-if="checkMenuPermission('/user/list')" index="/user/list">用户列表</el-menu-item>
+            <el-menu-item v-if="checkMenuPermission('/user/profile')" index="/user/profile">个人信息</el-menu-item>
           </el-sub-menu>
-          <el-menu-item index="/role/list">
+          <el-menu-item v-if="showRoleManagement" index="/role/list">
             <el-icon><Setting /></el-icon>
             <span>角色管理</span>
           </el-menu-item>
-          <el-menu-item index="/department/list">
+          <el-menu-item v-if="showDepartmentManagement" index="/department/list">
             <el-icon><Setting /></el-icon>
             <span>部门管理</span>
           </el-menu-item>
-          <el-menu-item index="/system/monitor">
+          <el-menu-item v-if="showSystemMonitor" index="/system/monitor">
             <el-icon><Setting /></el-icon>
             <span>服务监控</span>
           </el-menu-item>
-          <el-menu-item index="/system/operation-log">
+          <el-menu-item v-if="showOperationLog" index="/system/operation-log">
             <el-icon><Setting /></el-icon>
             <span>操作日志</span>
           </el-menu-item>

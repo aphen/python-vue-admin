@@ -39,6 +39,18 @@
             placeholder="请输入角色描述"
           />
         </el-form-item>
+        <el-form-item label="权限">
+          <el-tree-select
+            v-model="roleForm.permissions"
+            :data="permissions"
+            show-checkbox
+            multiple
+            filterable
+            check-strictly
+            placeholder="请选择权限"
+            style="width: 100%"
+          />
+        </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
@@ -72,7 +84,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getRoles, createRole, updateRole, deleteRole, assignUsers } from '@/api/role'
+import { getRoles, createRole, updateRole, deleteRole, assignUsers, getPermissions, assignPermissions } from '@/api/role'
 import { getUsers } from '@/api/user'
 
 const roles = ref([])
@@ -85,8 +97,39 @@ const selectedUsers = ref([])
 
 const roleForm = ref({
   name: '',
-  description: ''
+  description: '',
+  permissions: []
 })
+
+const permissions = ref<any[]>([])
+
+// 获取权限列表并格式化为树形结构
+const fetchPermissions = async () => {
+  try {
+    const response = await getPermissions()
+    const permissionMap = new Map()
+    
+    response.data.forEach((item: any) => {
+      const appLabel = item.content_type.app_label
+      if (!permissionMap.has(appLabel)) {
+        permissionMap.set(appLabel, {
+          label: appLabel,
+          value: `${item.id}`,
+          children: []
+        })
+      }
+      
+      permissionMap.get(appLabel).children.push({
+        value: item.id,
+        label: `${item.codename} | ${item.name}`
+      })
+    })
+    
+    permissions.value = Array.from(permissionMap.values())
+  } catch (error) {
+    ElMessage.error('获取权限列表失败')
+  }
+}
 
 // 获取角色列表
 const fetchRoles = async () => {
@@ -112,13 +155,17 @@ const fetchUsers = async () => {
 }
 
 // 显示角色对话框
-const showRoleDialog = (type: 'create' | 'edit', role: any = null) => {
+const showRoleDialog = async (type: 'create' | 'edit', role: any = null) => {
   dialogType.value = type
+  await fetchPermissions()
   if (type === 'edit' && role) {
-    roleForm.value = { ...role }
+    roleForm.value = { 
+      ...role,
+      permissions: role.permissions?.map((p: any) => p.id) || []
+    }
     currentRole.value = role
   } else {
-    roleForm.value = { name: '', description: '' }
+    roleForm.value = { name: '', description: '', permissions: [] }
     currentRole.value = null
   }
   roleDialogVisible.value = true
@@ -127,12 +174,19 @@ const showRoleDialog = (type: 'create' | 'edit', role: any = null) => {
 // 保存角色
 const handleSaveRole = async () => {
   try {
+    let roleId
     if (dialogType.value === 'create') {
-      await createRole(roleForm.value)
+      const response = await createRole(roleForm.value)
+      roleId = response.data.id
       ElMessage.success('创建角色成功')
     } else {
-      await updateRole(currentRole.value?.id, roleForm.value)
+      roleId = currentRole.value?.id
+      await updateRole(roleId, roleForm.value)
       ElMessage.success('更新角色成功')
+    }
+    // 分配权限
+    if (roleForm.value.permissions.length > 0) {
+      await assignPermissions(roleId, roleForm.value.permissions)
     }
     roleDialogVisible.value = false
     fetchRoles()

@@ -40,23 +40,39 @@ const formRules = {
 const users = ref<User[]>([])
 const loading = ref(false)
 
+const currentPage = ref(1)
+const pageSize = ref(10)
+const total = ref(0)
+
 const fetchUsers = async () => {
   loading.value = true
   try {
-    const res = await getUsers()
+    const res = await getUsers(currentPage.value, pageSize.value)
     users.value = res.results
+    total.value = res.count || res.results.length
     console.log(users.value)
-   } catch (error) {
+  } catch (error) {
     ElMessage.error('获取用户列表失败')
-   } finally {
+  } finally {
     loading.value = false
-   }
+  }
+}
+
+const handlePageChange = (page: number) => {
+  currentPage.value = page
+  fetchUsers()
+}
+
+const handleSizeChange = (size: number) => {
+  pageSize.value = size
+  currentPage.value = 1
+  fetchUsers()
 }
 
 const fetchRoles = async () => {
   try {
     const response = await getRoles()
-    roles.value = response.data
+    roles.value = response.data.results
   } catch (error) {
     ElMessage.error('获取角色列表失败')
   }
@@ -173,6 +189,17 @@ onMounted(() => {
         </template>
       </el-table-column>
     </el-table>
+    <div class="pagination-container">
+      <el-pagination
+        v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
+        :page-sizes="[10, 20, 50, 100]"
+        :total="total"
+        layout="total, sizes, prev, pager, next"
+        @size-change="handleSizeChange"
+        @current-change="handlePageChange"
+      />
+    </div>
       <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑用户' : '新增用户'" width="500px" @closed="resetForm">
       <el-form :model="formData" :rules="formRules" label-width="80px">
         <el-form-item label="用户名" prop="username">
@@ -224,5 +251,10 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center; */
   margin-bottom: 20px;
+}
+.pagination-container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
 }
 </style>

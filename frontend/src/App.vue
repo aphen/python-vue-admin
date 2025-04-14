@@ -3,9 +3,11 @@ import NavBar from './components/NavBar.vue'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from './api'
+import { useUserStore } from './store/user'
 
 const isLoggedIn = ref(false)
 const router = useRouter()
+const userStore = useUserStore()
 
 // 检查用户是否登录
 const checkLoginStatus = async () => {
@@ -16,8 +18,8 @@ const checkLoginStatus = async () => {
   }
   
   try {
-    // 这里可以添加一个验证token的API请求
-    // 例如：await api.get('/api/verify-token/')
+    // 初始化用户信息，包括管理员状态
+    await userStore.initUserInfo()
     isLoggedIn.value = true
   } catch (error) {
     console.error('Token验证失败:', error)

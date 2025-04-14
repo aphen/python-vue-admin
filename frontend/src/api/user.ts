@@ -14,8 +14,18 @@ export interface CreateUserData {
   password: string
 }
 
-export const getUsers = async () => {
-  const response = await api.get<{results: User[]}>('/polls/api/users/')
+export interface UserResponse {
+  count: number
+  results: User[]
+}
+
+export const getUsers = async (page = 1, pageSize = 10) => {
+  const response = await api.get<UserResponse>('/polls/api/users/', {
+    params: {
+      page,
+      page_size: pageSize
+    }
+  })
   return response.data
 }
 

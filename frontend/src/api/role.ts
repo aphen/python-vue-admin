@@ -42,3 +42,20 @@ export const assignUsers = (roleId: number, userIds: number[]) => {
     data: { user_ids: userIds }
   })
 }
+
+// 获取所有权限
+export function getPermissions() {
+  return request({
+    url: '/polls/api/roles/permissions/',
+    method: 'get'
+  })
+}
+
+// 分配权限
+export function assignPermissions(roleId: string, permissionIds: string[]) {
+  return request({
+    url: `/polls/api/roles/${roleId}/assign_permissions/`,
+    method: 'post',
+    data: { permission_ids: permissionIds }
+  })
+}
