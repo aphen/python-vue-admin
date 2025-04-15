@@ -10,6 +10,8 @@ from .system_monitor import SystemMonitorView
 from .operation_log_views import OperationLogViewSet
 from .todo_views import TodoViewSet
 from .blog_views import BlogPostViewSet
+from .blog_comment_views import BlogCommentViewSet
+from .blog_tag_views import BlogTagViewSet
 
 router = DefaultRouter()
 router.register(r'polls', api_views.QuestionViewSet)
@@ -19,6 +21,8 @@ router.register(r'departments', DepartmentViewSet, basename='departments')
 router.register(r'operation-logs', OperationLogViewSet, basename='operation-logs')
 router.register(r'todos', TodoViewSet, basename='todo')
 router.register(r'blog-posts', BlogPostViewSet, basename='blog-posts')
+router.register(r'blog-comments', BlogCommentViewSet, basename='blog-comments')
+router.register(r'blog-tags', BlogTagViewSet, basename='blog-tags')
 
 app_name = 'polls'
 urlpatterns = [

@@ -13,44 +13,44 @@
           </el-button>
         </div>
       </template>
-      <el-table :data="blogPosts" style="width: 100%">
-        <el-table-column prop="title" label="标题" min-width="200">
-          <template #default="{ row }">
-            <router-link :to="`/blog/detail/${row.id}`" class="blog-title-link">
-              {{ row.title }}
-            </router-link>
-          </template>
-        </el-table-column>
-        <el-table-column prop="summary" label="摘要" min-width="300" show-overflow-tooltip />
-        <el-table-column prop="author.username" label="作者" width="120" />
-        <el-table-column prop="created_at" label="发布时间" width="180">
-          <template #default="{ row }">
-            {{ formatDate(row.created_at) }}
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="180" fixed="right">
-          <template #default="{ row }">
-            <div class="action-buttons">
-              <el-button 
-                v-if="isAuthorOrAdmin(row.author.id)" 
-                type="primary" 
-                size="small" 
-                @click="handleEdit(row.id)"
-              >
+      <el-row>
+        <el-col v-for="post in blogPosts" :key="post.id" :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb-4">
+          <div class="blog-card">
+            <div class="blog-card-header">
+              <router-link :to="`/blog/detail/${post.id}`" class="blog-title-link">
+                <h3 class="blog-title">{{ post.title }}</h3>
+              </router-link>
+            </div>
+            <div class="blog-card-content">
+              <p class="blog-summary">{{ post.summary }}</p>
+              <div class="blog-meta">
+                <div class="blog-info">
+                  <span class="author">{{ post.author.username }}</span>
+                  <span class="date">{{ formatDate(post.created_at) }}</span>
+                </div>
+                <div class="blog-tags">
+                  <el-tag
+                    v-for="tag in post.tags"
+                    :key="tag.id"
+                    size="small"
+                    class="mx-1"
+                  >
+                    {{ tag.name }}
+                  </el-tag>
+                </div>
+              </div>
+            </div>
+            <div class="blog-card-actions" v-if="isAuthorOrAdmin(post.author.id)">
+              <el-button type="primary" size="small" @click="handleEdit(post.id)">
                 <el-icon><Edit /></el-icon> 编辑
               </el-button>
-              <el-button 
-                v-if="isAuthorOrAdmin(row.author.id)" 
-                type="danger" 
-                size="small" 
-                @click="handleDelete(row.id, row.title)"
-              >
+              <el-button type="danger" size="small" @click="handleDelete(post.id, post.title!)">
                 <el-icon><Delete /></el-icon> 删除
               </el-button>
             </div>
-          </template>
-        </el-table-column>
-      </el-table>
+          </div>
+        </el-col>
+      </el-row>
       <div class="pagination-container">
         <el-pagination
           v-model:current-page="currentPage"
@@ -168,20 +168,79 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 24px;
 }
 
-.action-buttons {
+.mb-4 {
+  margin-bottom: 0;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+}
+
+.mb-4:last-child {
+  border-bottom: none;
+}
+
+.blog-card {
+  height: 100%;
+}
+
+.blog-card-header {
+  margin-bottom: 16px;
+}
+
+.blog-title {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+.blog-card-content {
+  margin-bottom: 16px;
+}
+
+.blog-summary {
+  margin: 12px 0;
+  color: var(--el-text-color-regular);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.blog-meta {
   display: flex;
+  flex-direction: column;
   gap: 8px;
 }
 
+.blog-info {
+  display: flex;
+  justify-content: space-between;
+}
+
+.blog-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  color: var(--el-text-color-secondary);
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+
+.blog-card-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
 .blog-title-link {
-  color: var(--el-color-primary);
+  color: var(--el-text-color-primary);
   text-decoration: none;
 }
 
 .blog-title-link:hover {
-  text-decoration: underline;
+  color: var(--el-color-primary);
+  text-decoration: none;
 }
 
 .pagination-container {

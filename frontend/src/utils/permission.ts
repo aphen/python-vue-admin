@@ -10,7 +10,7 @@ const menuPermissionMap = {
   '/system/monitor': 'view_monitor',
   '/system/operation-log': 'view_operation_log',
   '/blog/list': 'view_blogpost',
-  '/blog/create': 'add_blog',
+  '/blog/create': 'add_blogpost',
   '/todo': 'view_todo',
   '/polls': 'view_poll'
 }

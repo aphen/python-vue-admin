@@ -13,7 +13,7 @@ class BlogPostViewSet(viewsets.ModelViewSet):
     pagination_class = BlogPostPagination
     
     def get_queryset(self):
-        return BlogPost.objects.select_related('author').all()
+        return BlogPost.objects.select_related('author').prefetch_related('tags').all()
     
     def get_serializer_class(self):
         if self.action == 'list':

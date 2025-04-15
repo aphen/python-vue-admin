@@ -98,21 +98,40 @@ export const useUserStore = defineStore('user', () => {
       const token = localStorage.getItem('access_token');
       if (token) {
         try { 
-          const roles = await api.get('/polls/api/roles/permissions_by_role_ids/', {
-            params: {
-              role_ids: userInfo.roles.join(','),
-            },
-          });
-          const response = await api.get('/polls/api/users/me/');
-         
+          // 先获取用户信息
+          const userData = await import('@/api/user').then(m => m.getCurrentUser());
           
-          console.log(roles.data)
-         
+          // 先设置基本用户信息
           setUserInfo({
-            ...response.data,
+            ...userData,
             isAuthenticated: true,
-            permissions: roles.data,
           });
+          console.log('获取到的角色:', userData.roles);
+          // 确保用户有角色信息后再获取权限
+          if (userData.roles && userData.roles.length > 0) {
+            
+            try {
+              // 将角色ID数组转换为逗号分隔的字符串
+              const roleIds = userData.roles.map((role: any) => 
+                typeof role === 'object' ? role.id : role
+              ).join(',');
+              
+              // 根据角色ID获取权限
+              const permissions = await import('@/api/user').then(m => m.getPermissionsByRoleIds(roleIds));
+              
+              console.log('获取到的权限:', permissions);
+              
+              // 更新用户权限信息
+              setUserInfo({
+                ...userData,
+                isAuthenticated: true,
+                permissions: permissions,
+              });
+            } catch (permError) {
+              console.error('获取用户权限失败:', permError);
+              // 权限获取失败不影响用户基本信息
+            }
+          }
         } catch (error) {
           console.error('获取用户信息失败:', error);
           clearUserInfo();

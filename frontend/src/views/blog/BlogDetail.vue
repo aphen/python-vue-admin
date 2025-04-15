@@ -31,6 +31,48 @@
         </div>
       </div>
       <div class="blog-content" v-html="blogPost.content"></div>
+        <div class="blog-comments">
+          <h3>评论区</h3>
+          <div v-if="userStore.isAuthenticated" class="comment-form">
+            <el-input
+              v-model="newComment"
+              type="textarea"
+              :rows="3"
+              placeholder="写下你的评论..."
+            />
+            <el-button type="primary" @click="submitComment" :loading="submitting">
+              发表评论
+            </el-button>
+          </div>
+          <div v-else class="login-prompt">
+            <el-alert
+              title="请登录后发表评论"
+              type="info"
+              :closable="false"
+              show-icon
+            />
+          </div>
+          <div class="comments-list">
+            <div v-if="comments.length === 0" class="no-comments">
+              暂无评论
+            </div>
+            <div v-for="comment in comments" :key="comment.id" class="comment-item">
+              <div class="comment-header">
+                <span class="comment-author">{{ comment.author.username }}</span>
+                <span class="comment-time">{{ formatDate(comment.created_at) }}</span>
+                <el-button
+                  v-if="isAuthorOrAdmin(comment.author.id)"
+                  type="danger"
+                  size="small"
+                  @click="deleteComment(comment.id)"
+                >
+                  删除
+                </el-button>
+              </div>
+              <div class="comment-content">{{ comment.content }}</div>
+            </div>
+          </div>
+        </div>
     </el-card>
     <div v-else class="loading-container">
       <el-empty description="加载中..." />
@@ -43,13 +85,17 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowLeft, Edit, Delete } from '@element-plus/icons-vue'
-import { getBlogPost, deleteBlogPost } from '@/api/blog'
+import { getBlogPost, deleteBlogPost, getBlogComments, createBlogComment, deleteBlogComment } from '@/api/blog'
 import { useUserStore } from '@/store/user'
+import type{ BlogComment } from '@/api/blog'
 
 const router = useRouter()
 const route = useRoute()
 const userStore = useUserStore()
 const blogPost = ref<any>({})
+const comments = ref<BlogComment[]>([])
+const newComment = ref('')
+const submitting = ref(false)
 
 // 创建一个简单的日期格式化函数
 const formatDate = (date: string) => {
@@ -111,8 +157,54 @@ const fetchBlogPost = async () => {
   }
 }
 
+// 获取评论列表
+const fetchComments = async () => {
+  try {
+    const response = await getBlogComments(route.params.id as string)
+    comments.value = response.data.results
+  } catch (error) {
+    ElMessage.error('获取评论失败')
+  }
+}
+
+// 提交评论
+const submitComment = async () => {
+  if (!newComment.value.trim()) {
+    ElMessage.warning('请输入评论内容')
+    return
+  }
+
+  submitting.value = true
+  try {
+    await createBlogComment({
+      post: Number(route.params.id),
+      content: newComment.value,
+      author_id: userStore.id!
+    })
+    ElMessage.success('评论发表成功')
+    newComment.value = ''
+    await fetchComments()
+  } catch (error) {
+    ElMessage.error('评论发表失败')
+  } finally {
+    submitting.value = false
+  }
+}
+
+// 删除评论
+const deleteComment = async (commentId: number) => {
+  try {
+    await deleteBlogComment(commentId)
+    ElMessage.success('评论删除成功')
+    await fetchComments()
+  } catch (error) {
+    ElMessage.error('评论删除失败')
+  }
+}
+
 onMounted(() => {
   fetchBlogPost()
+  fetchComments()
 })
 </script>
 
@@ -152,6 +244,65 @@ onMounted(() => {
 .blog-content {
   line-height: 1.8;
   font-size: 16px;
+  max-height: 700px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.blog-comments {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid var(--el-border-color-light);
+}
+
+.comment-form {
+  margin-bottom: 20px;
+}
+
+.comment-form .el-button {
+  margin-top: 10px;
+}
+
+.login-prompt {
+  margin-bottom: 20px;
+}
+
+.comments-list {
+  margin-top: 20px;
+}
+
+.comment-item {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: var(--el-bg-color-page);
+  border-radius: 4px;
+}
+
+.comment-header {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.comment-author {
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.comment-time {
+  color: var(--el-text-color-secondary);
+  font-size: 14px;
+  flex-grow: 1;
+}
+
+.comment-content {
+  line-height: 1.6;
+}
+
+.no-comments {
+  text-align: center;
+  color: var(--el-text-color-secondary);
+  padding: 20px 0;
 }
 
 .loading-container {

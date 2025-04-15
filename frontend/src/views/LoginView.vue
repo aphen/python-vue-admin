@@ -99,12 +99,38 @@ const handleLogin = async () => {
       
       try {
         // 获取用户信息
-        const userResponse = await api.get('/polls/api/users/me/')
+        const userData = await import('@/api/user').then(m => m.getCurrentUser())
+        
+        // 先设置基本用户信息
         userStore.setUserInfo({
-          ...userResponse.data,
+          ...userData,
           isAuthenticated: true
         })
-
+        
+        // 如果用户有角色信息，立即获取权限
+        if (userData.roles && userData.roles.length > 0) {
+          try {
+            // 将角色ID数组转换为逗号分隔的字符串
+            const roleIds = userData.roles.map((role: any) => 
+              typeof role === 'object' ? role.id : role
+            ).join(',')
+            
+            // 根据角色ID获取权限
+            const permissions = await import('@/api/user').then(m => m.getPermissionsByRoleIds(roleIds))
+            console.log('登录时获取到的权限:', permissions)
+            
+            // 更新用户权限信息
+            userStore.setUserInfo({
+              ...userData,
+              isAuthenticated: true,
+              permissions: permissions
+            })
+          } catch (permError) {
+            console.error('登录时获取用户权限失败:', permError)
+            // 权限获取失败不影响用户基本信息和登录流程
+          }
+        }
+        
         // 重置token过期提醒标志
         resetTokenExpireAlert()
         

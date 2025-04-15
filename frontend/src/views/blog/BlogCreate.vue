@@ -18,6 +18,24 @@
             placeholder="请输入文章摘要"
           />
         </el-form-item>
+        <el-form-item label="标签" prop="tags">
+          <el-select
+            v-model="formData.tags"
+            multiple
+            filterable
+            allow-create
+            default-first-option
+            placeholder="请选择或创建标签"
+            @visible-change="handleSelectVisibleChange"
+          >
+            <el-option
+              v-for="tag in tags"
+              :key="tag.id"
+              :label="tag.name"
+              :value="tag.id"
+            />
+          </el-select>
+        </el-form-item>
         <el-form-item label="内容" prop="content">
           <div style="border: 1px solid #ccc">
             <Toolbar
@@ -50,9 +68,11 @@ import { ref, reactive, shallowRef, onBeforeUnmount, onMounted, computed } from 
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { createBlogPost, getBlogPost, updateBlogPost } from '@/api/blog'
+import { getTags, createTag } from '@/api/tag'
 import '@wangeditor/editor/dist/css/style.css'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import type { IEditorConfig, IToolbarConfig } from '@wangeditor/editor'
+import type { Tag } from '@/api/tag'
 
 const router = useRouter()
 const route = useRoute()
@@ -62,6 +82,7 @@ const editorRef = shallowRef()
 // 判断是否为编辑模式
 const blogId = computed(() => route.query.id ? Number(route.query.id) : undefined)
 const isEdit = computed(() => !!blogId.value)
+const tags = ref<Tag[]>([])
 
 // 编辑器配置
 const mode = 'default'
@@ -70,10 +91,11 @@ const editorConfig: Partial<IEditorConfig> = {
 }
 const toolbarConfig: Partial<IToolbarConfig> = {}
 
-const formData = reactive({
+const formData = reactive<any>({
   title: '',
   summary: '',
-  content: ''
+  content: '',
+  tags: []
 })
 
 // 组件销毁时，也及时销毁编辑器
@@ -120,6 +142,25 @@ const handleReset = () => {
   }
 }
 
+// 处理标签选择框显示状态变化
+const handleSelectVisibleChange = async (visible: boolean) => {
+  if (!visible) {
+    const newTags = formData.tags.filter((tag: string | number) => typeof tag === 'string')
+    for (const newTagName of newTags) {
+      try {
+        const response = await createTag({ name: newTagName as string })
+        const index = formData.tags.indexOf(newTagName)
+        if (index !== -1) {
+          formData.tags[index] = response.data.id
+        }
+        tags.value.push(response.data)
+      } catch (error) {
+        ElMessage.error(`创建标签 "${newTagName}" 失败`)
+      }
+    }
+  }
+}
+
 // 获取博客文章详情
 const fetchBlogPost = async () => {
   if (!blogId.value) return
@@ -132,13 +173,25 @@ const fetchBlogPost = async () => {
     formData.title = blogData.title || ''
     formData.summary = blogData.summary || ''
     formData.content = blogData.content || ''
+    formData.tags = blogData.tags?.map((tag: any) => tag.id) || []
   } catch (error) {
     ElMessage.error('获取文章详情失败')
     router.push('/blog/list')
   }
 }
 
+// 获取所有标签
+const fetchTags = async () => {
+  try {
+    const response = await getTags()
+    tags.value = response.data.results
+  } catch (error) {
+    ElMessage.error('获取标签列表失败')
+  }
+}
+
 onMounted(() => {
+  fetchTags()
   if (isEdit.value) {
     fetchBlogPost()
   }

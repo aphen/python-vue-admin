@@ -11,19 +11,31 @@ export interface BlogPost {
   }
   created_at: string
   updated_at: string
+  tags?: string[]
 }
 
-export interface BlogPostsResponse {
-  count: number
-  next: string | null
-  previous: string | null
-  results: BlogPost[]
-}
+import type { PaginationResponse } from './types/pagination'
+
+export type BlogPostsResponse = PaginationResponse<BlogPost>
 
 export interface BlogPostsParams {
   page?: number
   page_size?: number
 }
+
+export interface BlogComment {
+  id: number
+  post: number
+  author: {
+    id: number
+    username: string
+  }
+  content: string
+  created_at: string
+  updated_at: string
+}
+
+export type BlogCommentsResponse = PaginationResponse<BlogComment>
 
 // 获取博客文章列表
 export const getBlogPosts = (params: BlogPostsParams) => {
@@ -64,6 +76,32 @@ export const updateBlogPost = (id: number, data: Partial<BlogPost>) => {
 export const deleteBlogPost = (id: number) => {
   return request({
     url: `/polls/api/blog-posts/${id}/`,
+    method: 'delete'
+  })
+}
+
+// 获取文章评论列表
+export const getBlogComments = (postId: string | number) => {
+  return request<BlogCommentsResponse>({
+    url: '/polls/api/blog-comments/',
+    method: 'get',
+    params: { post_id: postId }
+  })
+}
+
+// 创建评论
+export const createBlogComment = (data: { post: number; content: string; author_id: number }) => {
+  return request<BlogComment>({
+    url: '/polls/api/blog-comments/',
+    method: 'post',
+    data
+  })
+}
+
+// 删除评论
+export const deleteBlogComment = (id: number) => {
+  return request({
+    url: `/polls/api/blog-comments/${id}/`,
     method: 'delete'
   })
 }

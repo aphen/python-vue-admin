@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue'
 import { useUserStore } from '@/store/user'
 import { ElMessage } from 'element-plus'
 import api from '@/api'
+import { getCurrentUser, updateCurrentUser } from '@/api/user'
 
 const userStore = useUserStore()
 const userProfile = ref({
@@ -13,7 +14,7 @@ const userProfile = ref({
 
 const handleSubmit = async () => {
   try {
-    await api.put('/polls/api/users/me/', {
+    await updateCurrentUser({
       email: userProfile.value.email
     })
     userStore.setUserInfo({
@@ -47,10 +48,10 @@ onMounted(async () => {
       console.log('UserProfile: 手动设置Authorization头')
     }
     
-    const response = await api.get('/polls/api/users/me/')
-    console.log('获取用户信息成功:', response.status)
+    const userData = await getCurrentUser()
+    console.log('获取用户信息成功')
     userStore.setUserInfo({
-      ...response.data,
+      ...userData,
       isAuthenticated: true
     })
     userProfile.value = {
